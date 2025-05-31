@@ -1,0 +1,13 @@
+Junk memory + random bytes	Changes heap layout + memory fingerprint
+asm volatile + nop	Introduces instruction padding variation
+.note/.comment patch	Alters ELF section content for signature diff
+dlopen() + dlsym()	Uses dynamic loading, changes GOT/PLT entries
+JIT code	Injects runtime machine code to alter behavior
+
+gcc mutate.c -o mutate -fno-stack-protector -z execstack -s -falign-functions=1 -falign-loops=1
+
+gcc mutate.c -o mutate -fno-stack-protector -z execstack -s -falign-functions=1 -falign-loops=1 -Oz -fno-asynchronous-unwind-tables -s -pipe -march=native -Wl,-z,norelro -Wl,-O1 -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 -s -Wa,--no-pad-sections -march=native -Wl,--build-id=none -Wl,-O1 -Wl,-z,separate-code
+
+/usr/bin/upx --best --brute mutate
+
+/usr/bin/sstrip -z mutate
