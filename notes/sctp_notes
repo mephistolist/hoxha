@@ -1,4 +1,5 @@
 gcc -Oz -fno-stack-protector -fno-asynchronous-unwind-tables -Wl,-z,norelro -Wl,-O1 -nostartfiles -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 -s -Wa,--no-pad-sections -march=native -Wl,--build-id=none -Wl,-O1 -Wl,-z,separate-code -s -pipe sctp.c -o sctp -lsctp
+(Revise the above as it seems to brake client output)
 
 /usr/bin/upx --best --brute sctp
 
