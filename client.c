@@ -39,19 +39,36 @@ int main(int argc, char *argv[]) {
     while (1) {
         printf("sctp-shell> ");
         fflush(stdout);
+
         memset(buffer, 0, BUFSIZE);
         if (!fgets(buffer, BUFSIZE, stdin)) break;
-        buffer[strcspn(buffer, "\n")] = 0; // remove newline
+        buffer[strcspn(buffer, "\n")] = 0; // Remove newline
+
+        // Check for local exit command
+        if (strcmp(buffer, "exit") == 0) {
+            printf("[*] Exiting client.\n");
+            break;
+        }
 
         sctp_sendmsg(sock, buffer, strlen(buffer), NULL, 0, 0, 0, 0, 0, 0);
 
-        memset(buffer, 0, BUFSIZE);
-        int n;
-        while ((n = sctp_recvmsg(sock, buffer, BUFSIZE, NULL, 0, 0, 0)) > 0) {
-            write(STDOUT_FILENO, buffer, n);
-            if (n < BUFSIZE) break;
+        // Read server response
+        while (1) {
             memset(buffer, 0, BUFSIZE);
+            int n = sctp_recvmsg(sock, buffer, BUFSIZE, NULL, 0, 0, 0);
+            if (n <= 0) {
+                fprintf(stderr, "[!] Connection closed or error.\n");
+                close(sock);
+                return 1;
+            }
+
+            if (strncmp(buffer, "__END__", 7) == 0)
+                break;
+
+            write(STDOUT_FILENO, buffer, n);
         }
+
+        printf("\n");
     }
 
     close(sock);
