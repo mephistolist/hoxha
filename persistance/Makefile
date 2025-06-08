@@ -11,8 +11,5 @@ libexec.so: libexec.c
 libhide.so: libhide.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-#libnet.so: libnet.c
-#	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
 clean:
 	rm -f libexec.so libhide.so
