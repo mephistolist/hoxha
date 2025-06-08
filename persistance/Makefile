@@ -1,13 +1,18 @@
 CC = cc
-CFLAGS = -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe --std=c17 -march=native
-LDFLAGS = -shared -ldl -s -nostartfiles
-TARGET = libhide.so
-SRC = multi.c
+CFLAGS = -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe --std=c17 -march=native -shared -ldl -s -nostartfiles
+LDFLAGS = -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code
 
-all: $(TARGET)
+# Targets
+all: libexec.so libhide.so #libnet.so
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+libexec.so: libexec.c
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+libhide.so: libhide.c
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+#libnet.so: libnet.c
+#	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET)
+	rm -f libexec.so libhide.so
