@@ -19,13 +19,6 @@
 
 static unsigned long long internal_seed = 0;
 
-// Add this at the top for FreeBSD/Linux self path logic
-#ifdef __FreeBSD__
-    const char *self = "/proc/curproc/file";
-#else
-    const char *self = "/proc/self/exe";
-#endif
-
 // Prototype
 void mutate1(char *s);
 void junk_memory(void);
@@ -247,34 +240,9 @@ void polymorphic_junk() {
     }
 }
 
-void patch_note_section(FILE *f) {
-    Elf64_Ehdr ehdr;
-    fread(&ehdr, 1, sizeof(ehdr), f);
-    fseek(f, ehdr.e_shoff, SEEK_SET);
-
-    Elf64_Shdr shdr;
-    char shstrtab[4096] = {0};
-
-    fseek(f, ehdr.e_shoff + ehdr.e_shentsize * ehdr.e_shstrndx, SEEK_SET);
-    fread(&shdr, 1, sizeof(shdr), f);
-    fseek(f, shdr.sh_offset, SEEK_SET);
-    fread(shstrtab, 1, sizeof(shstrtab) - 1, f);
-
-    for (int i = 0; i < ehdr.e_shnum; ++i) {
-        fseek(f, ehdr.e_shoff + i * ehdr.e_shentsize, SEEK_SET);
-        fread(&shdr, 1, sizeof(shdr), f);
-        const char *name = &shstrtab[shdr.sh_name];
-        if (strcmp(name, ".note.ABI-tag") == 0 || strcmp(name, ".comment") == 0) {
-            fseek(f, shdr.sh_offset, SEEK_SET);
-            char junk[] = "RANDOMIZED-SECTION\0";
-            fwrite(junk, 1, sizeof(junk) - 1, f);
-            break;
-        }
-    }
-}
-
 int mutate_main(int argc, char **argv) {
     (void)argc; 
+    (void)argv;
     init_entropy();
     srand(internal_seed ^ __rdtsc());
 
@@ -284,28 +252,6 @@ int mutate_main(int argc, char **argv) {
 
     polymorphic_junk();
     junk_memory();
-    //patch_note_section();
-    // === Try to open executable using realpath(argv[0]) first ===
-    FILE *f = NULL;
-    char resolved_path[PATH_MAX];
-
-    if (realpath(argv[0], resolved_path)) {
-        f = fopen(resolved_path, "r+b");
-    }
-
-    // === Fallback: /proc/self/exe ===
-    if (!f) {
-        f = fopen("/proc/self/exe", "r+b");
-        if (f) {
-            unlink("/proc/self/exe"); // cleanup handle
-        }
-    }
-
-    if (f) {
-        patch_note_section(f);
-        fclose(f);
-    }
-
     patch_mutate1();
 
     char input[MAX_LEN];
