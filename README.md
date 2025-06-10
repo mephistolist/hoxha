@@ -5,4 +5,7 @@ A userland rootkit that was meant to be everything <a href="https://github.com/m
   <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Enver_Hoxha_%28portret%29.jpg" width="50%" height="50%" />
 </p>
 
-
+You can download this like so:
+```
+git clone https://github.com/mephistolist/hoxha.git
+```
