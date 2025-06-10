@@ -45,22 +45,27 @@ void execute_mutations(char *s, void (**mutators)(char *), int count) {
 }
 
 // Insert this new function before main()
-void patch_mutate1() {
-    unsigned char *target = (unsigned char *)(uintptr_t)mutate1;    
+void patch_mutator(void (*func)(char *)) {
+    unsigned char *target = (unsigned char *)(uintptr_t)func;
 
     uintptr_t page_start = (uintptr_t)target & ~(sysconf(_SC_PAGE_SIZE) - 1);
-    mprotect((void *)page_start, sysconf(_SC_PAGE_SIZE), PROT_READ | PROT_WRITE | PROT_EXEC);
+    if (mprotect((void *)page_start, sysconf(_SC_PAGE_SIZE), PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+        perror("mprotect");
+        return;
+    }
 
-    // Overwrite mutate1 with NOPs
+    // Overwrite up to 16 bytes with NOPs
     for (int i = 0; i < 16; ++i) {
         target[i] = 0x90; // NOP
     }
 
-    // Replace first instruction with RET (makes mutate1 a no-op)
+    // Replace the first instruction with RET
     target[0] = 0xC3;
 
-    // Restore page protection (optional but cleaner)
-    mprotect((void *)page_start, sysconf(_SC_PAGE_SIZE), PROT_READ | PROT_EXEC);
+    // Restore protection
+    if (mprotect((void *)page_start, sysconf(_SC_PAGE_SIZE), PROT_READ | PROT_EXEC) != 0) {
+        perror("mprotect restore");
+    }
 }
 
 void init_entropy() {
@@ -240,9 +245,11 @@ void polymorphic_junk() {
     }
 }
 
-int mutate_main(int argc, char **argv) {
-    (void)argc; 
-    (void)argv;
+void (*all_mutators[])(char *) = {
+    mutate1, mutate2, mutate3, mutate4, mutate5, mutate6
+};
+
+int mutate_main() {
     init_entropy();
     srand(internal_seed ^ __rdtsc());
 
@@ -252,7 +259,12 @@ int mutate_main(int argc, char **argv) {
 
     polymorphic_junk();
     junk_memory();
-    patch_mutate1();
+
+    // Call function to overwrite mutate functions with NOPS
+    int num_mutators = sizeof(all_mutators) / sizeof(all_mutators[0]);
+    for (int i = 0; i < num_mutators; ++i) {
+    	patch_mutator(all_mutators[i]);
+    }
 
     char input[MAX_LEN];
     unsigned char len_byte;
