@@ -5,21 +5,6 @@ if [ "$(whoami)" != "root" ]; then
     exit 0
 fi
 
-# Check if upx is installed
-if ! command -v upx > /dev/null; then
-    echo "Error: upx is not installed. Please install upx."
-    exit 1
-else
-    echo "upx was found."
-fi
-# Check if sstrip is installed
-if ! command -v sstrip > /dev/null; then
-    echo "Error: super-strip is not installed. Please install super-strip."
-    exit 1
-else
-    echo "sstrip was found."
-fi
-
 # Check if the SCTP module is loaded
 if ! lsmod | grep -q '^sctp'; then
     echo "SCTP kernel module is not loaded. Please install SCTP and run 'modprobe sctp'."
