@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Please run as root, or this may not work correctly."
+    exit 0
+fi
+
+# Check if upx is installed
+if ! command -v upx > /dev/null; then
+    echo "Error: upx is not installed. Please install upx."
+    exit 1
+fi
+# Check if sstrip is installed
+if ! command -v sstrip > /dev/null; then
+    echo "Error: sstrip is not installed. Please install sstrip."
+    exit 1
+fi
+
+# Check if the SCTP module is loaded
+if ! lsmod | grep -q '^sctp'; then
+    echo "Error: SCTP kernel module is not loaded. Please run: sudo modprobe sctp"
+    exit 1
+fi
+
+echo "Configuration successful!"
