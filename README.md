@@ -38,5 +38,3 @@ As SCTP ports are hard to close, I would suggest running this to exit the shell:
 killall -9 hoxha && service cron restart
 ```
 This will ensure that only one port is left listening for future connections. 
-
-Further documentation will be made in the future.
