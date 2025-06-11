@@ -9,17 +9,23 @@ fi
 if ! command -v upx > /dev/null; then
     echo "Error: upx is not installed. Please install upx."
     exit 1
+else
+    echo "upx was found."
 fi
 # Check if sstrip is installed
 if ! command -v sstrip > /dev/null; then
-    echo "Error: sstrip is not installed. Please install sstrip."
+    echo "Error: super-strip is not installed. Please install super-strip."
     exit 1
+else
+    echo "sstrip was found."
 fi
 
 # Check if the SCTP module is loaded
 if ! lsmod | grep -q '^sctp'; then
-    echo "Error: SCTP kernel module is not loaded. Please run: sudo modprobe sctp"
+    echo "SCTP kernel module is not loaded. Please install SCTP and run 'modprobe sctp'."
     exit 1
+else
+    echo "SCTP was found."
 fi
 
 echo "Configuration successful!"
