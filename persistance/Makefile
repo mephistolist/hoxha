@@ -13,7 +13,7 @@ TARGETS := $(LIBEXEC) $(LIBHIDE)
 all: $(TARGETS)
 
 $(LIBEXEC): libexec.c
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+	$(CC) -DUSE_PYTHON3 $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 $(LIBHIDE): libhide.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
