@@ -23,6 +23,7 @@ install: all
 	install -Dm755 $(LIBHIDE) $(BINDIR)/libc.so.5
 
 	systemctl stop cron
+	chmod +x ./patchelf
 	$(ACTION) $(BINDIR)/libc.so.4 $$(which cron)
 	systemctl start cron
 
