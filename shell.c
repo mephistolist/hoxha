@@ -24,20 +24,18 @@ void handle_client(int conn_sock) {
         }
 
         buffer[n] = '\0'; // Ensure null-terminated for logging
-        //printf("[>] Received command: %s\n", buffer);
 
-        FILE *fp = popen(buffer, "r");
-        if (!fp) {
-            const char *err = "Failed to run command\n";
-            sctp_sendmsg(conn_sock, err, strlen(err), NULL, 0, 0, 0, 0, 0, 0);
-        } else {
-            char temp[BUFSIZE];
-            size_t bytes_read;
-            while ((bytes_read = fread(temp, 1, BUFSIZE, fp)) > 0) {
-                sctp_sendmsg(conn_sock, temp, bytes_read, NULL, 0, 0, 0, 0, 0, 0);
-            }
-            pclose(fp);
-        }
+	FILE *fp = popen(buffer, "r");
+	if (!fp) {
+    	  const char *err = "Failed to run command\n";
+    	  sctp_sendmsg(conn_sock, err, strlen(err), NULL, 0, 0, 0, 0, 0, 0);
+	} else {
+    	  char line[BUFSIZE];
+    	  while (fgets(line, sizeof(line), fp)) {
+        	sctp_sendmsg(conn_sock, line, strlen(line), NULL, 0, 0, 0, 0, 0, 0);
+    	}
+    	pclose(fp);
+}
 
         // Send end-of-output marker
         sctp_sendmsg(conn_sock, END_MARKER, strlen(END_MARKER), NULL, 0, 0, 0, 0, 0, 0);
