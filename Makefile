@@ -1,9 +1,9 @@
-=CC        := cc
+CC        := cc
 OUT       := hoxha
-CLIENT    := client
+CLIENT    := enver
 UPX	 := ./upx
 SSTRIP    := ./sstrip
-SRC       := knocker.c shell.c mutate.c ptrace.c
+SRC       := knocker.c shell.c mutate.c anti_debug.c
 BINDIR    := /usr/bin
 CHMOD     := chmod +x
 
