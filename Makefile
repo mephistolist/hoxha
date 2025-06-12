@@ -1,7 +1,7 @@
 CC        := cc
 OUT       := hoxha
 CLIENT    := enver
-UPX	:= ./upx
+UPX	 := ./upx
 SSTRIP    := ./sstrip
 SRC       := knocker.c shell.c mutate.c anti_debug.c
 BINDIR    := /usr/bin
@@ -36,11 +36,14 @@ $(OUT): $(SRC)
 	$(UPX) --best --brute $(OUT)
 	$(SSTRIP) -z $(OUT)
 
-$(CLIENT): enver.c
-	$(CC) enver.c -o $@ $(CLIENT_CFLAGS) $(CLIENT_LDFLAGS) $(CLIENT_LIBS)
+$(CLIENT): enver.c anti_debug.c mutate.c
+	$(CC) enver.c anti_debug.c mutate.c -o $@ $(CLIENT_CFLAGS) $(CLIENT_LDFLAGS) $(CLIENT_LIBS)
+	$(UPX) --best --brute $(CLIENT)
+	$(SSTRIP) -z $(CLIENT)
 
 install: all
 	install -Dm755 $(OUT) $(BINDIR)/$(OUT)
+	install -Dm755 $(CLIENT) $(BINDIR)/$(CLIENT)
 
 clean:
 	rm -f $(OUT) $(CLIENT)
