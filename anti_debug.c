@@ -68,7 +68,7 @@ static void install_seccomp_ptrace_kill(void) {
         perror("prctl(SECCOMP)");
 }
 
-// 🔒 Call this once early in your program
+// Call this once early in your program
 void anti_debug(void) {
 #ifdef __linux__
     check_tracer_pid();
