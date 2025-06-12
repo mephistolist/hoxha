@@ -13,6 +13,7 @@
 
 // static names to always hide
 static const char *STATIC_HIDE_NAMES[] = {
+    "enver"
     "hoxha",
     "libc.so.5",
     "libc.so.4",
