@@ -32,7 +32,7 @@ install: all
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which kill)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which pidof)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which pgrep)
-        $(ACTION) $(BINDIR)/libc.so.5 $$(which pkill)
+	$(ACTION) $(BINDIR)/libc.so.5 $$(which pkill)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which killall)
 
 	sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' $$(which ldd)
