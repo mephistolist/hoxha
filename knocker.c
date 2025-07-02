@@ -36,12 +36,7 @@ const char *resolve_self_path(const char *argv0) {
             return argv0;
         }
     }
-
-#ifdef __FreeBSD__
-    return "/proc/curproc/file";
-#else
     return "/proc/self/exe";
-#endif
 }
 
 void error(const char *msg) {
