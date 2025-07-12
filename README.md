@@ -2,7 +2,7 @@
 A userland rootkit for x86_64 Linux that was meant to be everything <a href="https://github.com/mephistolist/tito">Tito</a> was not. As Enver Hoxha was Tito's next door neighbor and completely opposed in ideology, there was no more a fitting name. Hoxha was also known for being very paranoid, so a lot more detection-evasion was used.   
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Enver_Hoxha_%28portret%29.jpg" width="75%" height="75%" />
+  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Enver_Hoxha_%28portret%29.jpg" />
 </p>
 
 You can download this like so:
