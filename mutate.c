@@ -19,7 +19,7 @@
 
 static unsigned long long internal_seed = 0;
 
-// Prototype
+// Prototypes
 void mutate1(char *s);
 void junk_memory(void);
 unsigned char internal_random_byte(void);
@@ -44,7 +44,6 @@ void execute_mutations(char *s, void (**mutators)(char *), int count) {
     }
 }
 
-// Insert this new function before main()
 void patch_mutator(void (*func)(char *)) {
     unsigned char *target = (unsigned char *)(uintptr_t)func;
 
