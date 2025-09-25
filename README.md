@@ -42,3 +42,5 @@ cat shellcode.bin | base64
 Add that base64 encoded string to the hoxha/persistance/libexec.c file and re-run the Makefile in the persistance folder to apply your changes.
 
 Currently tested for Debian Trixie with cron running and in your $PATH. Other distos and setups may work or require manual intervention. 
+
+*This project has now been superceded by <a href="https://github.com/mephistolist/Mao">Mao</a>. 
