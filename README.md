@@ -5,6 +5,11 @@ A userland rootkit for x86_64 Linux that was meant to be everything <a href="htt
   <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Enver_Hoxha_%28portret%29.jpg" />
 </p>
 
+You will need to install one dependency in order to build this code:
+
+```
+sudo apt install libreadline-dev
+```
 You can download this like so:
 ```
 git clone https://github.com/mephistolist/hoxha.git
