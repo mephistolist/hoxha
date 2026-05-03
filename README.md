@@ -10,7 +10,7 @@ You will need to install one dependency in order to build this code:
 ```
 sudo apt install libreadline-dev
 ```
-You can download this like so:
+You can then download this project like so:
 ```
 git clone https://github.com/mephistolist/hoxha.git
 ```
